@@ -1,12 +1,14 @@
 package ui;
 
 import com.sun.istack.internal.NotNull;
+import model.GameField;
 import model.HexIndex;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -23,7 +25,10 @@ public class GameUI {
     private final JFrame myAppFrame;
     private final JPanel myGamePanel;
 
-    public GameUI() {
+    private final GameField myGameField;
+
+    public GameUI(@NotNull GameField field) {
+        this.myGameField = field;
         JPanel gamePanel = createBoardPanel();
         JFrame frame = new JFrame("Hive");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,37 +41,30 @@ public class GameUI {
         this.myGamePanel = gamePanel;
     }
 
-    // TODO: 9/14/2019
+    public void repaintGameField() {
+        myGamePanel.repaint();
+    }
+
     @NotNull
-    private static JPanel createBoardPanel() {
+    private JPanel createBoardPanel() {
         final JPanel result = new JPanel(true) {
             @Override
             protected void paintComponent(@NotNull Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D)g;
                 g2d.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-                drawSomeHexes(g);
+                drawGameField(g);
             }
         };
         setupMouseListener(result);
         return result;
     }
 
-    private static void drawSomeHexes(Graphics g) {
+    private void drawGameField(Graphics g) {
         // Needed to avoid drawing same lines twice, because it leads to some
         // lines becoming think while others normal
-        drawHexRow(g, 0, 3, 20);
-        drawHexRow(g, 0, 2, 20);
-        drawHexRow(g, 0, 1, 20);
-        drawHexRow(g, 0, 0, 20);
-        drawHexRow(g, 0, -1, 20);
-        drawHexRow(g, 0, -2, 20);
-        drawHexRow(g, 0, -3, 20);
-    }
-
-    private static void drawHexRow(@NotNull Graphics g, int startP, int startQ, int size) {
-        for (int i = 0; i < size; i++) {
-            drawHex(g, new HexIndex(startP + i, startQ));
+        for (HexIndex hexIndex : myGameField.getHexIndices()) {
+            drawHex(g, hexIndex);
         }
     }
 

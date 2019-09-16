@@ -1,11 +1,10 @@
 package model;
 
 import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
+import model.units.Unit;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GameField {
     private final Map<HexIndex, List<Unit>> myField = new HashMap<>();
@@ -31,8 +30,18 @@ public class GameField {
 
     @NotNull
     public List<HexIndex> getPossibleMoves(@NotNull Unit unit) {
-
         return null; //TODO:
+    }
+
+    @NotNull
+    public Set<HexIndex> getHexIndices() {
+        return myField.keySet();
+    }
+
+    @Nullable
+    public Unit get(@NotNull HexIndex index) {
+        List<Unit> hex = myField.get(index);
+        return hex != null && !hex.isEmpty() ? hex.get(hex.size() - 1) : null;
     }
 
     private List<Unit> getOrCreateHex(@NotNull HexIndex index) {
