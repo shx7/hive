@@ -32,4 +32,12 @@ public final class HexIndex {
     public static HexIndex create(int p, int q) {
         return new HexIndex(p, q);
     }
+
+    @Override
+    public String toString() {
+        return "HexIndex{" +
+                "p=" + p +
+                ", q=" + q +
+                '}';
+    }
 }

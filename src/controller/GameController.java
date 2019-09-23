@@ -10,6 +10,7 @@ public class GameController {
     public static void main(String[] args) {
         GameController controller = new GameController();
         Unit dummyUnit = new DummyUnit();
+        controller.myField.put(HexIndex.create(0, 0), dummyUnit);
         controller.myField.put(HexIndex.create(1, 1), dummyUnit);
         controller.myField.put(HexIndex.create(2, 1), dummyUnit);
         controller.myField.put(HexIndex.create(2, 0), dummyUnit);
