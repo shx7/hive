@@ -3,8 +3,9 @@ package ui;
 import com.sun.istack.internal.NotNull;
 import math.Point;
 import math.Vector;
-import model.GameField;
+import model.GameModel;
 import model.HexIndex;
+import model.units.Unit;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,6 +18,9 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 public class GameUI {
     private final static Dimension WINDOW_DIMENSION = new Dimension(640, 480);
     private final static java.awt.Point FRAME_POSITION = new java.awt.Point(200, 200);
+    private static final Color SELECTED_COLOR = new Color(68, 200, 13);
+    private static final Color EMPTY_HEX_COLOR = new Color(145, 159, 192);
+    private static final Color DUMMY_UNIT_COLOR = new Color(21, 122, 202);
 
     private final static int HEX_SIDE_SIZE = 14;
     private final static java.awt.Point GAME_FIELD_POSITION = new java.awt.Point(100, 100);
@@ -26,10 +30,13 @@ public class GameUI {
     private final JFrame myAppFrame;
     private final JPanel myGamePanel;
 
-    private final GameField myGameField;
+    private final GameModel myGameModel;
+    private final PlayerActionListener myPlayerActionListener;
 
-    public GameUI(@NotNull GameField field) {
-        this.myGameField = field;
+    public GameUI(@NotNull GameModel field, @NotNull PlayerActionListener myPlayerActionListener) {
+        this.myGameModel = field;
+        this.myPlayerActionListener = myPlayerActionListener;
+
         JPanel gamePanel = createBoardPanel();
         JFrame frame = new JFrame("Hive");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -64,8 +71,17 @@ public class GameUI {
     private void drawGameField(Graphics g) {
         // Needed to avoid drawing same lines twice, because it leads to some
         // lines becoming think while others normal
-        for (HexIndex hexIndex : myGameField.getHexIndices()) {
-            drawHex(g, hexIndex);
+        for (HexIndex hexIndex : myGameModel.getHexIndices()) {
+            boolean isSelected = hexIndex.equals(myGameModel.getSelectedHex());
+            Unit unit = myGameModel.getUnit(hexIndex);
+            final Color color;
+            if (isSelected) {
+                color = SELECTED_COLOR;
+            }
+            else {
+                color = unit != null ? DUMMY_UNIT_COLOR : EMPTY_HEX_COLOR;
+            }
+            drawHex(g, hexIndex, color);
         }
     }
 
@@ -78,6 +94,7 @@ public class GameUI {
                 HexIndex hexIndex = getHexIndexByMousePosition(e.getX(), e.getY());
                 if (hexIndex != null) {
                     System.out.println("Hex with index clicked " + hexIndex);
+                    myPlayerActionListener.clickedHex(hexIndex);
                 }
             }
 
@@ -97,17 +114,16 @@ public class GameUI {
         panel.addMouseMotionListener(mouseAdapter);
     }
 
-    private static void drawHex(@NotNull Graphics g, @NotNull HexIndex hexIndex) {
+    private void drawHex(@NotNull Graphics g, @NotNull HexIndex hexIndex, @NotNull Color color) {
         Point coordinates = hexIndexToCoordinates(hexIndex);
-        drawHex(g, (int)coordinates.x, (int)coordinates.y);
+        drawHex(g, (int)coordinates.x, (int)coordinates.y, color);
     }
 
-    private static void drawHex(@NotNull Graphics g, int x, int y) {
-        g.setColor(new Color(145, 159, 192));
+    private static void drawHex(@NotNull Graphics g, int x, int y, @NotNull Color color) {
+        g.setColor(color);
         Point[] hexPoints = calculateHexPoints(x, y);
         Point previousPoint = hexPoints[hexPoints.length - 1];
         for (Point hexPoint : hexPoints) {
-            System.out.println("" + previousPoint + hexPoint);
             g.drawLine((int)previousPoint.x, (int)previousPoint.y, (int)hexPoint.x, (int)hexPoint.y);
             previousPoint = hexPoint;
         }
@@ -128,7 +144,7 @@ public class GameUI {
 
     @NotNull
     private HexIndex getHexIndexByMousePosition(int x, int y) {
-        for (HexIndex hexIndex : myGameField.getHexIndices()) {
+        for (HexIndex hexIndex : myGameModel.getHexIndices()) {
             if (isHexOverMouse(hexIndex, x, y)) {
                 return hexIndex;
             }

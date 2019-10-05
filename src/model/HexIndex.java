@@ -4,7 +4,7 @@ import com.sun.istack.internal.NotNull;
 
 import java.util.Objects;
 
-public final class HexIndex {
+public final class HexIndex { // TODO: reevaluate selected corrdinate system
     public final int p;
     public final int q;
 

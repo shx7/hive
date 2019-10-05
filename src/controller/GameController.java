@@ -1,19 +1,32 @@
 package controller;
 
+import com.sun.istack.internal.NotNull;
+import model.GameModel;
+import model.HexIndex;
+import model.units.DummyUnit;
+import model.units.Unit;
 import ui.GameUI;
+import ui.PlayerActionListener;
 
-// TODO: states
-// TODO: proper ui loop
-public class GameController {
-    private final GameUI myGameUI = new GameUI();
+public class GameController implements PlayerActionListener {
+    private final GameModel myGameModel = new GameModel();
+    private final GameUI myGameUI = new GameUI(myGameModel, this);
+
+    @NotNull private GameState myState = GameState.SELECT_UNIT_TO_OPERATE;
 
     public static void main(String[] args) {
         GameController controller = new GameController();
         Unit dummyUnit = new DummyUnit();
-        controller.myField.put(HexIndex.create(0, 0), dummyUnit);
-        controller.myField.put(HexIndex.create(1, 1), dummyUnit);
-        controller.myField.put(HexIndex.create(2, 1), dummyUnit);
-        controller.myField.put(HexIndex.create(2, 0), dummyUnit);
-        controller.myField.put(HexIndex.create(3, -1), dummyUnit);
+        controller.myGameModel.put(HexIndex.create(0, 0), dummyUnit);
+    }
+
+    void setState(@NotNull GameState myState) {
+        this.myState = myState;
+    }
+
+    @Override
+    public void clickedHex(@NotNull HexIndex hexIndex) {
+        myState.clickedHex(myGameModel, this, hexIndex);
+        myGameUI.repaintGameField();
     }
 }
