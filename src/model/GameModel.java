@@ -9,7 +9,14 @@ import java.util.stream.Stream;
 
 public class GameModel {
     private final Map<HexIndex, List<Unit>> myField = new HashMap<>();
+    private final List<Player> myPlayers;
+
+    private int myActivePlayerIndex;
     private HexIndex mySelectedHex;
+
+    public GameModel(@NotNull List<Player> players) {
+        this.myPlayers = players;
+    }
 
     // TODO: check if move valid
     public void put(@NotNull HexIndex index, @NotNull Unit unit) {
@@ -88,11 +95,30 @@ public class GameModel {
         return mySelectedHex;
     }
 
-    public void setSelectedHex(@Nullable HexIndex mySelectedHex) {
-        this.mySelectedHex = mySelectedHex;
+    public void setSelectedHex(@Nullable HexIndex hexIndex) {
+        Unit unit = getUnit(hexIndex);
+        if (unit == null || getActivePlayer().equals(unit.getPlayer())) {
+            doSetSelectedHex(hexIndex);
+        }
+    }
+
+    private void doSetSelectedHex(@Nullable HexIndex hexIndex) {
+        this.mySelectedHex = hexIndex;
     }
 
     public boolean isEmptyHex(@NotNull HexIndex hexIndex) {
         return getUnit(hexIndex) == null;
+    }
+
+    @NotNull
+    private Player getActivePlayer() {
+        return myPlayers.get(myActivePlayerIndex);
+    }
+
+    public void changeActivePlayer() {
+        ++myActivePlayerIndex;
+        if (myActivePlayerIndex >= myPlayers.size()) {
+            myActivePlayerIndex = 0;
+        }
     }
 }

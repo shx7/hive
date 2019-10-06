@@ -3,21 +3,35 @@ package controller;
 import com.sun.istack.internal.NotNull;
 import model.GameModel;
 import model.HexIndex;
+import model.Player;
 import model.units.DummyUnit;
-import model.units.Unit;
 import ui.GameUI;
 import ui.PlayerActionListener;
 
-public class GameController implements PlayerActionListener {
-    private final GameModel myGameModel = new GameModel();
-    private final GameUI myGameUI = new GameUI(myGameModel, this);
+import java.awt.*;
+import java.util.Arrays;
+import java.util.List;
 
-    @NotNull private GameState myState = GameState.SELECT_UNIT_TO_OPERATE;
+public class GameController implements PlayerActionListener {
+    @NotNull private final GameModel myGameModel;
+    @NotNull private final GameUI myGameUI;
+    @NotNull private GameState myState;
+
+    private GameController(@NotNull List<Player> playerList) {
+        myGameModel = new GameModel(playerList);
+        myGameUI = new GameUI(myGameModel, this);
+        myState = GameState.SELECT_UNIT_TO_OPERATE;
+    }
 
     public static void main(String[] args) {
-        GameController controller = new GameController();
-        Unit dummyUnit = new DummyUnit();
-        controller.myGameModel.put(HexIndex.create(0, 0), dummyUnit);
+        // TODO: get rid of Players initialisation, they must be initialised inside model
+        Player whitePlayer = new Player("White", Color.WHITE);
+        Player blackPlayer = new Player("Black", Color.BLACK);
+        List<Player> playerList =
+                Arrays.asList(blackPlayer, whitePlayer);
+        GameController controller = new GameController(playerList);
+        controller.myGameModel.put(HexIndex.create(0, 0), new DummyUnit(whitePlayer));
+        controller.myGameModel.put(HexIndex.create(1, 0), new DummyUnit(blackPlayer));
     }
 
     void setState(@NotNull GameState myState) {

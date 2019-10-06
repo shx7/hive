@@ -19,14 +19,14 @@ public class GameUI {
     private final static Dimension WINDOW_DIMENSION = new Dimension(640, 480);
     private final static java.awt.Point FRAME_POSITION = new java.awt.Point(200, 200);
     private static final Color SELECTED_COLOR = new Color(68, 200, 13);
-    private static final Color EMPTY_HEX_COLOR = new Color(145, 159, 192);
-    private static final Color DUMMY_UNIT_COLOR = new Color(21, 122, 202);
+    private static final Color BORDER_COLOR = new Color(145, 159, 192);
 
     private final static int HEX_SIDE_SIZE = 14;
     private final static java.awt.Point GAME_FIELD_POSITION = new java.awt.Point(100, 100);
     private final static double L_cos30 = HEX_SIDE_SIZE * Math.cos(Math.PI / 6.0);
     private final static double L_sin30 = HEX_SIDE_SIZE * Math.sin(Math.PI / 6.0);
 
+    @SuppressWarnings({"unused", "FieldCanBeLocal"})
     private final JFrame myAppFrame;
     private final JPanel myGamePanel;
 
@@ -79,7 +79,7 @@ public class GameUI {
                 color = SELECTED_COLOR;
             }
             else {
-                color = unit != null ? DUMMY_UNIT_COLOR : EMPTY_HEX_COLOR;
+                color = unit != null ? unit.getPlayer().color : BORDER_COLOR;
             }
             drawHex(g, hexIndex, color);
         }
@@ -120,7 +120,7 @@ public class GameUI {
     }
 
     private static void drawHex(@NotNull Graphics g, int x, int y, @NotNull Color color) {
-        g.setColor(color);
+        g.setColor(BORDER_COLOR);
         Point[] hexPoints = calculateHexPoints(x, y);
         Point previousPoint = hexPoints[hexPoints.length - 1];
         for (Point hexPoint : hexPoints) {
@@ -128,6 +128,7 @@ public class GameUI {
             previousPoint = hexPoint;
         }
 
+        g.setColor(color);
         g.drawRect(x - 3, y - 3, 6, 6);
         g.fillRect(x, y, 6, 6);
     }

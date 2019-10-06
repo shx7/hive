@@ -20,6 +20,7 @@ public enum GameState {
                 model.move(selectedHex, hexIndex);
                 model.setSelectedHex(null);
                 controller.setState(SELECT_UNIT_TO_OPERATE);
+                model.changeActivePlayer();
             }
             else {
                 model.setSelectedHex(hexIndex);
