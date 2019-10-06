@@ -3,9 +3,9 @@ package model;
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 import model.units.Unit;
+import util.ContainerUtil;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GameModel {
@@ -62,15 +62,24 @@ public class GameModel {
                 .filter(Objects::nonNull);
     }
 
+    /**
+     * @param hexIndex hex which neighbours to enumerate
+     * @return array of neighbours indices ordered clockwise, starting from leftmost
+     * element in the same row. In other words spatially elements organised
+     * like that (where x is hexIndex):
+     *   [1] [2]
+     * [0] [x] [3]
+     *   [5] [4]
+     */
     @NotNull
     private HexIndex[] getNeighboursIndices(@NotNull HexIndex hexIndex) {
         final int p = hexIndex.p;
         final int q = hexIndex.q;
         int pShift = hexIndex.q % 2 != 0 ? 0 : -1;
         return new HexIndex[]{
-                HexIndex.create(p  + pShift, q - 1), HexIndex.create(p + pShift + 1, q - 1),
-                HexIndex.create(p - 1, q), /*  hexIndex, */ HexIndex.create(p + 1, q),
-                HexIndex.create(p + pShift, q + 1), HexIndex.create(p + pShift + 1, q + 1)
+                HexIndex.create(p - 1, q), HexIndex.create(p  + pShift, q - 1),
+                HexIndex.create(p + pShift + 1, q - 1), HexIndex.create(p + 1, q),
+                HexIndex.create(p + pShift + 1, q + 1), HexIndex.create(p + pShift, q + 1)
         };
     }
 
@@ -128,8 +137,21 @@ public class GameModel {
     @NotNull
     public Set<HexIndex> getPossibleMoves(@Nullable HexIndex hexIndex) {
         Unit unit = hexIndex != null ? getUnit(hexIndex) : null;
-        return unit != null
-                ? Arrays.stream(getNeighboursIndices(hexIndex)).filter(this::isEmptyHex).collect(Collectors.toSet())
-                : Collections.emptySet();
+        if (unit == null) {
+            return Collections.emptySet();
+        }
+        Set<HexIndex> result = new HashSet<>();
+
+        HexIndex[] neighboursIndices = getNeighboursIndices(hexIndex);
+        int length = neighboursIndices.length;
+        for (int i = 0; i < length; i++) {
+            HexIndex neighbourHex = neighboursIndices[i];
+            HexIndex leftNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i - 1);
+            HexIndex rightNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i + 1);
+            if (isEmptyHex(neighbourHex) && (isEmptyHex(leftNeighbourHex) || isEmptyHex(rightNeighbourHex))) {
+                result.add(neighbourHex);
+            }
+        }
+        return result;
     }
 }
