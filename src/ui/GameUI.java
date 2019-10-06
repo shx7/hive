@@ -127,6 +127,9 @@ public class GameUI {
             g.drawLine((int)previousPoint.x, (int)previousPoint.y, (int)hexPoint.x, (int)hexPoint.y);
             previousPoint = hexPoint;
         }
+
+        g.drawRect(x - 3, y - 3, 6, 6);
+        g.fillRect(x, y, 6, 6);
     }
 
     @NotNull
