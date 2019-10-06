@@ -1,6 +1,7 @@
 package ui;
 
 import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 import math.Point;
 import math.Vector;
 import model.GameModel;
@@ -19,7 +20,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 public class GameUI {
     private final static Dimension WINDOW_DIMENSION = new Dimension(640, 480);
     private final static java.awt.Point FRAME_POSITION = new java.awt.Point(200, 200);
-    private static final Color SELECTED_COLOR = new Color(68, 200, 13);
+    private static final Color SELECTED_COLOR = new Color(79, 237, 13);
     private static final Color BORDER_COLOR = new Color(145, 159, 192);
     private static final Color POSSIBLE_MOVE_COLOR = new Color(249, 202, 12);
 
@@ -78,18 +79,20 @@ public class GameUI {
         for (HexIndex hexIndex : myGameModel.getHexIndices()) {
             boolean isSelected = hexIndex.equals(selectedHex);
             Unit unit = myGameModel.getUnit(hexIndex);
-            final Color color;
-            if (isSelected) {
-                color = SELECTED_COLOR;
-            }
-            else if (possibleMoves.contains(hexIndex)) {
-                color = POSSIBLE_MOVE_COLOR;
-            }
-            else {
-                color = unit != null ? unit.getPlayer().color : BORDER_COLOR;
-            }
-            drawHex(g, hexIndex, color);
+            Color innerColor = unit != null ? unit.getPlayer().color : BORDER_COLOR;
+            Color outerColor = getOuterRectangleHexColor(isSelected, possibleMoves.contains(hexIndex));
+            drawHex(g, hexIndex, innerColor, outerColor);
         }
+    }
+
+    private Color getOuterRectangleHexColor(boolean isSelected, boolean isPossibleMove) {
+        if (isSelected) {
+            return SELECTED_COLOR;
+        }
+        else if (isPossibleMove) {
+            return POSSIBLE_MOVE_COLOR;
+        }
+        return null;
     }
 
     private void setupMouseListener(@NotNull JPanel panel) {
@@ -121,12 +124,17 @@ public class GameUI {
         panel.addMouseMotionListener(mouseAdapter);
     }
 
-    private void drawHex(@NotNull Graphics g, @NotNull HexIndex hexIndex, @NotNull Color color) {
+    private void drawHex(@NotNull Graphics g,
+                         @NotNull HexIndex hexIndex,
+                         @NotNull Color color,
+                         @Nullable Color outerRectColor) {
         Point coordinates = hexIndexToCoordinates(hexIndex);
-        drawHex(g, (int)coordinates.x, (int)coordinates.y, color);
+        drawHex(g, (int)coordinates.x, (int)coordinates.y, color, outerRectColor);
     }
 
-    private static void drawHex(@NotNull Graphics g, int x, int y, @NotNull Color color) {
+    private static void drawHex(@NotNull Graphics g, int x, int y,
+                                @NotNull Color innerRectColor,
+                                @Nullable Color outerRectColor) {
         g.setColor(BORDER_COLOR);
         Point[] hexPoints = calculateHexPoints(x, y);
         Point previousPoint = hexPoints[hexPoints.length - 1];
@@ -135,9 +143,17 @@ public class GameUI {
             previousPoint = hexPoint;
         }
 
+        if (outerRectColor != null) {
+            drawSquare(g, outerRectColor, x, y, 14, 10);
+        }
+        drawSquare(g, innerRectColor, x, y, 10, 6);
+    }
+
+    private static void drawSquare(@NotNull Graphics g, @NotNull Color color, int x, int y, int sideX, int sideY) {
         g.setColor(color);
-        g.drawRect(x - 3, y - 3, 6, 6);
-        g.fillRect(x, y, 6, 6);
+        int offsetX = sideX / 2;
+        int offsetY = sideY / 2;
+        g.fillRect(x - offsetX, y - offsetY, sideX, sideY);
     }
 
     @NotNull
