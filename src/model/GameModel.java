@@ -6,6 +6,7 @@ import model.units.Unit;
 import util.ContainerUtil;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GameModel {
@@ -90,8 +91,13 @@ public class GameModel {
 
     @Nullable
     public Unit getUnit(@NotNull HexIndex index) {
-        List<Unit> unitList = myField.get(index);
+        List<Unit> unitList = getUnitList(index);
         return unitList != null && !unitList.isEmpty() ? unitList.get(unitList.size() - 1) : null;
+    }
+
+    @Nullable
+    private List<Unit> getUnitList(@NotNull HexIndex index) {
+        return myField.get(index);
     }
 
     private List<Unit> getOrCreateHex(@NotNull HexIndex index) {
@@ -136,8 +142,9 @@ public class GameModel {
 
     @NotNull
     public Set<HexIndex> getPossibleMoves(@Nullable HexIndex hexIndex) {
-        Unit unit = hexIndex != null ? getUnit(hexIndex) : null;
-        if (unit == null) {
+        List<Unit> unitList = hexIndex != null ? getUnitList(hexIndex) : null;
+        if (unitList == null || unitList.isEmpty()
+                || unitList.size() == 1 && !isOneSwarmIfRemoveHex(hexIndex)) {
             return Collections.emptySet();
         }
         Set<HexIndex> result = new HashSet<>();
@@ -153,5 +160,31 @@ public class GameModel {
             }
         }
         return result;
+    }
+
+    @NotNull
+    private boolean isOneSwarmIfRemoveHex(@NotNull HexIndex hexIndexToRemove) {
+        Set<HexIndex> connectedHexesIfHexRemoved = new HashSet<>();
+        List<HexIndex> queue = new ArrayList<>();
+        HexIndex firstNeighbour =
+                ContainerUtil.findNot(getNeighboursIndices(hexIndexToRemove), this::isEmptyHex);
+        if (firstNeighbour != null) {
+            queue.add(firstNeighbour);
+        }
+
+        while (!queue.isEmpty()) {
+            HexIndex index = queue.remove(queue.size() - 1);
+            if (!hexIndexToRemove.equals(index)
+                    && !isEmptyHex(index) && connectedHexesIfHexRemoved.add(index)) {
+                Collections.addAll(queue, getNeighboursIndices(index));
+            }
+        }
+        // Expect to get all non empty hexes visited but hex to be removed
+        return connectedHexesIfHexRemoved.size() == getNotEmptyHexIndices().size() - 1;
+    }
+
+    @NotNull
+    private List<HexIndex> getNotEmptyHexIndices() {
+        return myField.keySet().stream().filter(hexIndex -> !isEmptyHex(hexIndex)).collect(Collectors.toList());
     }
 }
