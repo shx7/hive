@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Set;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -20,6 +21,7 @@ public class GameUI {
     private final static java.awt.Point FRAME_POSITION = new java.awt.Point(200, 200);
     private static final Color SELECTED_COLOR = new Color(68, 200, 13);
     private static final Color BORDER_COLOR = new Color(145, 159, 192);
+    private static final Color POSSIBLE_MOVE_COLOR = new Color(249, 202, 12);
 
     private final static int HEX_SIDE_SIZE = 14;
     private final static java.awt.Point GAME_FIELD_POSITION = new java.awt.Point(100, 100);
@@ -71,12 +73,17 @@ public class GameUI {
     private void drawGameField(Graphics g) {
         // Needed to avoid drawing same lines twice, because it leads to some
         // lines becoming think while others normal
+        HexIndex selectedHex = myGameModel.getSelectedHex();
+        Set<HexIndex> possibleMoves = myGameModel.getPossibleMoves(selectedHex);
         for (HexIndex hexIndex : myGameModel.getHexIndices()) {
-            boolean isSelected = hexIndex.equals(myGameModel.getSelectedHex());
+            boolean isSelected = hexIndex.equals(selectedHex);
             Unit unit = myGameModel.getUnit(hexIndex);
             final Color color;
             if (isSelected) {
                 color = SELECTED_COLOR;
+            }
+            else if (possibleMoves.contains(hexIndex)) {
+                color = POSSIBLE_MOVE_COLOR;
             }
             else {
                 color = unit != null ? unit.getPlayer().color : BORDER_COLOR;

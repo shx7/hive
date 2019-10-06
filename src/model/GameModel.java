@@ -5,6 +5,7 @@ import com.sun.istack.internal.Nullable;
 import model.units.Unit;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GameModel {
@@ -18,7 +19,6 @@ public class GameModel {
         this.myPlayers = players;
     }
 
-    // TODO: check if move valid
     public void put(@NotNull HexIndex index, @NotNull Unit unit) {
         List<Unit> hex = getOrCreateHex(index);
         hex.add(unit);
@@ -31,7 +31,6 @@ public class GameModel {
         }
     }
 
-    // TODO: check if move valid
     public void move(@NotNull HexIndex from, @NotNull HexIndex to) {
         List<Unit> hex = myField.get(from);
         if (hex == null || hex.isEmpty()) {
@@ -106,7 +105,7 @@ public class GameModel {
         this.mySelectedHex = hexIndex;
     }
 
-    public boolean isEmptyHex(@NotNull HexIndex hexIndex) {
+    private boolean isEmptyHex(@NotNull HexIndex hexIndex) {
         return getUnit(hexIndex) == null;
     }
 
@@ -120,5 +119,17 @@ public class GameModel {
         if (myActivePlayerIndex >= myPlayers.size()) {
             myActivePlayerIndex = 0;
         }
+    }
+
+    public boolean canMove(@NotNull HexIndex from, @NotNull HexIndex to) {
+        return !isEmptyHex(from) && getPossibleMoves(from).contains(to);
+    }
+
+    @NotNull
+    public Set<HexIndex> getPossibleMoves(@Nullable HexIndex hexIndex) {
+        Unit unit = hexIndex != null ? getUnit(hexIndex) : null;
+        return unit != null
+                ? Arrays.stream(getNeighboursIndices(hexIndex)).filter(this::isEmptyHex).collect(Collectors.toSet())
+                : Collections.emptySet();
     }
 }
