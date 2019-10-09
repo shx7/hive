@@ -143,8 +143,7 @@ public class GameModel {
     @NotNull
     public Set<HexIndex> getPossibleMoves(@Nullable HexIndex hexIndex) {
         List<Unit> unitList = hexIndex != null ? getUnitList(hexIndex) : null;
-        if (unitList == null || unitList.isEmpty()
-                || unitList.size() == 1 && !isOneSwarmIfRemoveHex(hexIndex)) {
+        if (unitList == null || unitList.isEmpty()) {
             return Collections.emptySet();
         }
         Set<HexIndex> result = new HashSet<>();
@@ -155,36 +154,44 @@ public class GameModel {
             HexIndex neighbourHex = neighboursIndices[i];
             HexIndex leftNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i - 1);
             HexIndex rightNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i + 1);
-            if (isEmptyHex(neighbourHex) && (isEmptyHex(leftNeighbourHex) || isEmptyHex(rightNeighbourHex))) {
+            if (isEmptyHex(neighbourHex)
+                    && (isEmptyHex(leftNeighbourHex) || isEmptyHex(rightNeighbourHex)) // can slide
+                    && swarmStaysConnectedIfMove(unitList.size() == 1 ? hexIndex : null, neighbourHex) // will touch the swarm
+            ) {
                 result.add(neighbourHex);
             }
         }
         return result;
     }
 
-    @NotNull
-    private boolean isOneSwarmIfRemoveHex(@NotNull HexIndex hexIndexToRemove) {
-        Set<HexIndex> connectedHexesIfHexRemoved = new HashSet<>();
-        List<HexIndex> queue = new ArrayList<>();
-        HexIndex firstNeighbour =
-                ContainerUtil.findNot(getNeighboursIndices(hexIndexToRemove), this::isEmptyHex);
-        if (firstNeighbour != null) {
-            queue.add(firstNeighbour);
-        }
+    /**
+     *
+     * @param from is null, if after move hex becomes empty, and not null,
+     *             if there are more than 1 unit on the hex
+     * @return true if swarm is connected after performing specified move
+     *         without changing model and performing move
+     */
+    private boolean swarmStaysConnectedIfMove(@Nullable HexIndex from,
+                                              @NotNull HexIndex to) {
+        return countConnectedHexesIfMove(from, to) >= getNotEmptyHexIndices().size();
+    }
+
+    private int countConnectedHexesIfMove(@NotNull HexIndex from, @NotNull HexIndex to) {
+        Set<HexIndex> visited = new HashSet<>();
+        visited.add(to);
+        List<HexIndex> queue = new ArrayList<>(ContainerUtil.filterNot(getNeighboursIndices(to), this::isEmptyHex));
 
         while (!queue.isEmpty()) {
             HexIndex index = queue.remove(queue.size() - 1);
-            if (!hexIndexToRemove.equals(index)
-                    && !isEmptyHex(index) && connectedHexesIfHexRemoved.add(index)) {
-                Collections.addAll(queue, getNeighboursIndices(index));
+            if (!index.equals(from) && !isEmptyHex(index) && visited.add(index)) {
+                queue.addAll(ContainerUtil.filterNot(getNeighboursIndices(index), this::isEmptyHex));
             }
         }
-        // Expect to get all non empty hexes visited but hex to be removed
-        return connectedHexesIfHexRemoved.size() == getNotEmptyHexIndices().size() - 1;
+        return visited.size();
     }
 
     @NotNull
-    private List<HexIndex> getNotEmptyHexIndices() {
+    private List<HexIndex> getNotEmptyHexIndices() { // TODO: cache value and update only on model change
         return myField.keySet().stream().filter(hexIndex -> !isEmptyHex(hexIndex)).collect(Collectors.toList());
     }
 }

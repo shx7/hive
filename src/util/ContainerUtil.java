@@ -3,6 +3,8 @@ package util;
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class ContainerUtil {
@@ -30,5 +32,21 @@ public class ContainerUtil {
             }
         }
         return null;
+    }
+
+    @NotNull
+    public static <T> List<T> filterNot(@NotNull T[] array, @NotNull Predicate<T> predicate) {
+        return filter(array, predicate.negate());
+    }
+
+    @NotNull
+    private static <T> List<T> filter(@NotNull T[] array, @NotNull Predicate<T> predicate) {
+        List<T> result = new ArrayList<>();
+        for (T x : array) {
+            if (predicate.test(x)) {
+                result.add(x);
+            }
+        }
+        return result;
     }
 }
