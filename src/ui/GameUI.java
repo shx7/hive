@@ -1,12 +1,12 @@
 package ui;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
 import math.Point;
 import math.Vector;
 import model.GameModel;
 import model.HexIndex;
 import model.units.Unit;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -169,7 +169,7 @@ public class GameUI {
         };
     }
 
-    @NotNull
+    @Nullable
     private HexIndex getHexIndexByMousePosition(int x, int y) {
         for (HexIndex hexIndex : myGameModel.getHexIndices()) {
             if (isHexOverMouse(hexIndex, x, y)) {

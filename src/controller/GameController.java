@@ -1,10 +1,10 @@
 package controller;
 
-import com.sun.istack.internal.NotNull;
 import model.GameModel;
 import model.HexIndex;
 import model.Player;
 import model.units.DummyUnit;
+import org.jetbrains.annotations.NotNull;
 import ui.GameUI;
 import ui.PlayerActionListener;
 

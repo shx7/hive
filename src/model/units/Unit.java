@@ -1,7 +1,7 @@
 package model.units;
 
-import com.sun.istack.internal.NotNull;
 import model.Player;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class Unit {
     @NotNull private final Player player;

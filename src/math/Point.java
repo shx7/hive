@@ -1,6 +1,6 @@
 package math;
 
-import com.sun.istack.internal.NotNull;
+import org.jetbrains.annotations.NotNull;
 
 public class Point {
     public final double x;

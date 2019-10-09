@@ -1,12 +1,12 @@
 package math;
 
-import com.sun.istack.internal.NotNull;
+import org.jetbrains.annotations.NotNull;
 
 public class Vector {
-    public final Point p1;
-    public final Point p2;
-    public final double dx;
-    public final double dy;
+    private final Point p1;
+    private final Point p2;
+    private final double dx;
+    private final double dy;
 
     private Vector(@NotNull Point p1, @NotNull Point p2) {
         this.p1 = p1;

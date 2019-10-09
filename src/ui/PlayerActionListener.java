@@ -1,7 +1,7 @@
 package ui;
 
-import com.sun.istack.internal.NotNull;
 import model.HexIndex;
+import org.jetbrains.annotations.NotNull;
 
 public interface PlayerActionListener {
     void clickedHex(@NotNull HexIndex hexIndex);

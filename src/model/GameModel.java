@@ -1,8 +1,8 @@
 package model;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
 import model.units.Unit;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import util.ContainerUtil;
 
 import java.util.*;
@@ -110,7 +110,7 @@ public class GameModel {
     }
 
     public void setSelectedHex(@Nullable HexIndex hexIndex) {
-        Unit unit = getUnit(hexIndex);
+        Unit unit = hexIndex != null ? getUnit(hexIndex) : null;
         if (unit == null || getActivePlayer().equals(unit.getPlayer())) {
             doSetSelectedHex(hexIndex);
         }
@@ -176,7 +176,7 @@ public class GameModel {
         return countConnectedHexesIfMove(from, to) >= getNotEmptyHexIndices().size();
     }
 
-    private int countConnectedHexesIfMove(@NotNull HexIndex from, @NotNull HexIndex to) {
+    private int countConnectedHexesIfMove(@Nullable HexIndex from, @NotNull HexIndex to) {
         Set<HexIndex> visited = new HashSet<>();
         visited.add(to);
         List<HexIndex> queue = new ArrayList<>(ContainerUtil.filterNot(getNeighboursIndices(to), this::isEmptyHex));

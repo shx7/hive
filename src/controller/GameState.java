@@ -1,8 +1,8 @@
 package controller;
 
-import com.sun.istack.internal.NotNull;
 import model.GameModel;
 import model.HexIndex;
+import org.jetbrains.annotations.NotNull;
 
 public enum GameState {
     SELECT_UNIT_TO_OPERATE {
@@ -16,7 +16,7 @@ public enum GameState {
         @Override
         void clickedHex(@NotNull GameModel model, @NotNull GameController controller, @NotNull HexIndex hexIndex) {
             HexIndex selectedHex = model.getSelectedHex();
-            if (model.canMove(selectedHex, hexIndex)) {
+            if (selectedHex != null && model.canMove(selectedHex, hexIndex)) {
                 model.move(selectedHex, hexIndex);
                 model.setSelectedHex(null);
                 controller.setState(SELECT_UNIT_TO_OPERATE);
