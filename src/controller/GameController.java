@@ -3,7 +3,7 @@ package controller;
 import model.GameModel;
 import model.HexIndex;
 import model.Player;
-import model.units.DummyUnit;
+import model.units.BeeQueen;
 import org.jetbrains.annotations.NotNull;
 import ui.GameUI;
 import ui.PlayerActionListener;
@@ -30,8 +30,13 @@ public class GameController implements PlayerActionListener {
         List<Player> playerList =
                 Arrays.asList(blackPlayer, whitePlayer);
         GameController controller = new GameController(playerList);
-        controller.myGameModel.put(HexIndex.create(0, 0), new DummyUnit(whitePlayer));
-        controller.myGameModel.put(HexIndex.create(1, 0), new DummyUnit(blackPlayer));
+        controller.myGameModel.put(new BeeQueen(whitePlayer, HexIndex.create(0, 0)));
+        controller.myGameModel.put(new BeeQueen(blackPlayer, HexIndex.create(1, 0)));
+        controller.myGameModel.put(new BeeQueen(blackPlayer, HexIndex.create(1, -1)));
+        controller.myGameModel.put(new BeeQueen(whitePlayer, HexIndex.create(1, 1)));
+        controller.myGameModel.put(new BeeQueen(whitePlayer, HexIndex.create(1, 2)));
+        controller.myGameModel.put(new BeeQueen(blackPlayer, HexIndex.create(2, 0)));
+        controller.myGameModel.put(new BeeQueen(whitePlayer, HexIndex.create(2, 0)));
     }
 
     void setState(@NotNull GameState myState) {
