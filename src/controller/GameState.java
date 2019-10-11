@@ -16,11 +16,11 @@ public enum GameState {
         @Override
         void clickedHex(@NotNull GameModel model, @NotNull GameController controller, @NotNull HexIndex hexIndex) {
             HexIndex selectedHex = model.getSelectedHex();
-            if (selectedHex != null && model.canMove(selectedHex, hexIndex)) {
+            if (selectedHex != null && model.canMoveFromSelectedHexTo(hexIndex)) {
                 model.move(selectedHex, hexIndex);
                 model.setSelectedHex(null);
-                controller.setState(SELECT_UNIT_TO_OPERATE);
                 model.changeActivePlayer();
+                controller.setState(SELECT_UNIT_TO_OPERATE);
             }
             else {
                 model.setSelectedHex(hexIndex);

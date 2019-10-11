@@ -12,8 +12,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Collections;
-import java.util.Set;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -76,15 +74,11 @@ public class GameUI {
         // Needed to avoid drawing same lines twice, because it leads to some
         // lines becoming think while others normal
         HexIndex selectedHex = myGameModel.getSelectedHex();
-        Unit selectedUnit = myGameModel.getUnit(selectedHex);
-        Set<HexIndex> possibleMoves = selectedUnit != null
-                ? selectedUnit.getPossibleMoves(myGameModel)
-                : Collections.emptySet(); // TODO: cache it
         for (HexIndex hexIndex : myGameModel.getHexIndices()) {
             boolean isSelected = hexIndex.equals(selectedHex);
             Unit unit = myGameModel.getUnit(hexIndex);
             Color innerColor = unit != null ? unit.getPlayer().color : BORDER_COLOR;
-            Color outerColor = getOuterRectangleHexColor(isSelected, possibleMoves.contains(hexIndex));
+            Color outerColor = getOuterRectangleHexColor(isSelected, myGameModel.canMoveFromSelectedHexTo(hexIndex));
             drawHex(g, hexIndex, innerColor, outerColor);
         }
     }

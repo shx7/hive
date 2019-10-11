@@ -15,10 +15,12 @@ public class GameModel {
     private final List<Player> myPlayers;
 
     private int myActivePlayerIndex;
-    private HexIndex mySelectedHex;
+    @Nullable private HexIndex mySelectedHex;
+    @NotNull private Set<HexIndex> myPossibleMovesFromSelectedHex;
 
     public GameModel(@NotNull List<Player> players) {
-        this.myPlayers = players;
+        myPlayers = players;
+        myPossibleMovesFromSelectedHex = Collections.emptySet();
     }
 
     public void put(@NotNull Unit unit) {
@@ -99,7 +101,8 @@ public class GameModel {
     }
 
     private void doSetSelectedHex(@Nullable HexIndex hexIndex) {
-        this.mySelectedHex = hexIndex;
+        mySelectedHex = hexIndex;
+        myPossibleMovesFromSelectedHex = getPossibleMoves(mySelectedHex);
     }
 
     public boolean isEmptyHex(@NotNull HexIndex hexIndex) {
@@ -118,13 +121,18 @@ public class GameModel {
         }
     }
 
-    public boolean canMove(@NotNull HexIndex from, @NotNull HexIndex to) { // TODO: cache possible moves
-        Unit unit = getUnit(from);
-        return unit != null && unit.getPossibleMoves(this).contains(to);
+    public boolean canMoveFromSelectedHexTo(@NotNull HexIndex hexIndex) {
+        return myPossibleMovesFromSelectedHex.contains(hexIndex);
     }
 
     @NotNull
     public List<HexIndex> getNotEmptyHexIndices() { // TODO: cache value and update only on model change
         return myField.keySet().stream().filter(hexIndex -> !isEmptyHex(hexIndex)).collect(Collectors.toList());
+    }
+
+    @NotNull
+    private Set<HexIndex> getPossibleMoves(@Nullable HexIndex from) {
+        Unit unit = getUnit(from);
+        return unit != null ? unit.getPossibleMoves(this) : Collections.emptySet();
     }
 }
