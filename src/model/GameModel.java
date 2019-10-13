@@ -1,6 +1,7 @@
 package model;
 
 import model.units.Unit;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,16 +75,23 @@ public class GameModel {
     }
 
     @Nullable
+    @Contract("null -> null")
     public Unit getUnit(@Nullable HexIndex index) {
         List<Unit> unitList = index != null ? getUnitList(index) : null;
         return unitList != null && !unitList.isEmpty() ? unitList.get(unitList.size() - 1) : null;
     }
 
     @Nullable
-    public List<Unit> getUnitList(@NotNull HexIndex index) {
-        return myField.get(index);
+    @Contract("null -> null; !null -> !null") // TODO: nasty, refactor
+    public List<Unit> getUnitList(@Nullable HexIndex index) {
+        List<Unit> result = null;
+        if (index != null) {
+            result = myField.get(index);
+        }
+        return result;
     }
 
+    @NotNull
     private List<Unit> getOrCreateHex(@NotNull HexIndex index) {
         return myField.computeIfAbsent(index, idx -> new ArrayList<>());
     }

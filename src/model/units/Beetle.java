@@ -1,5 +1,6 @@
 package model.units;
 
+import model.FieldUtils;
 import model.GameModel;
 import model.HexIndex;
 import model.Player;
@@ -10,20 +11,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class BeeQueen extends Unit {
-    public BeeQueen(@NotNull Player player, @NotNull HexIndex position) {
-        super(player, position, new Color(246, 141, 21));
+public class Beetle extends Unit {
+    public Beetle(@NotNull Player player, @NotNull HexIndex position) {
+        super(player, position, new Color(194, 69, 180));
     }
 
     @Override
-    public @NotNull MoveStrategy createMoveStrategy() {
+    protected @NotNull MoveStrategy createMoveStrategy() {
         return new MoveStrategyBase() {
-            @NotNull
             @Override
+            @NotNull
             public Set<HexIndex> getPossibleMoves(@NotNull HexIndex fromIndex, @NotNull GameModel model) {
-                List<Unit> unitList = model.getUnitList(fromIndex);
+                List<Unit> unitList = model.getUnitList(getPosition());
                 final Set<HexIndex> result = new HashSet<>();
-                for (HexIndex neighbourHex : getNeighboursWhereCanSlide(fromIndex, model)) {
+
+                for (HexIndex neighbourHex : FieldUtils.getNeighboursIndices(fromIndex)) {
                     if (swarmStaysConnectedIfMove(unitList.size() == 1 ? fromIndex : null, neighbourHex, model)) { // will touch the swarm
                         result.add(neighbourHex);
                     }

@@ -8,5 +8,5 @@ import java.util.Set;
 
 public interface MoveStrategy {
     @NotNull
-    Set<HexIndex> getPossibleMoves(@NotNull HexIndex hexIndex, @NotNull GameModel model);
+    Set<HexIndex> getPossibleMoves(@NotNull HexIndex fromIndex, @NotNull GameModel model);
 }
