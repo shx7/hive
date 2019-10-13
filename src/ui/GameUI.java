@@ -79,7 +79,7 @@ public class GameUI {
             Unit unit = myGameModel.getUnit(hexIndex);
             Color innerColor = unit != null ? unit.getPlayer().color : BORDER_COLOR;
             Color outerColor = getOuterRectangleHexColor(isSelected, myGameModel.canMoveFromSelectedHexTo(hexIndex));
-            drawHex(g, hexIndex, innerColor, outerColor);
+            drawHex(g, hexIndex, innerColor, outerColor, unit != null ? unit.getColor() : null);
         }
     }
 
@@ -125,14 +125,16 @@ public class GameUI {
     private void drawHex(@NotNull Graphics g,
                          @NotNull HexIndex hexIndex,
                          @NotNull Color color,
-                         @Nullable Color outerRectColor) {
+                         @Nullable Color outerRectColor,
+                         @Nullable Color unitColor) {
         Point coordinates = hexIndexToCoordinates(hexIndex);
-        drawHex(g, (int)coordinates.x, (int)coordinates.y, color, outerRectColor);
+        drawHex(g, (int)coordinates.x, (int)coordinates.y, color, outerRectColor, unitColor);
     }
 
     private static void drawHex(@NotNull Graphics g, int x, int y,
                                 @NotNull Color innerRectColor,
-                                @Nullable Color outerRectColor) {
+                                @Nullable Color outerRectColor,
+                                @Nullable Color unitColor) {
         g.setColor(BORDER_COLOR);
         Point[] hexPoints = calculateHexPoints(x, y);
         Point previousPoint = hexPoints[hexPoints.length - 1];
@@ -145,6 +147,10 @@ public class GameUI {
             drawSquare(g, outerRectColor, x, y, 14, 10);
         }
         drawSquare(g, innerRectColor, x, y, 10, 6);
+
+        if (unitColor != null) {
+            drawSquare(g, unitColor, x, y, 4, 4);
+        }
     }
 
     private static void drawSquare(@NotNull Graphics g, @NotNull Color color, int x, int y, int sideX, int sideY) {
