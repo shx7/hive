@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 public class BeeQueen extends Unit {
-    public BeeQueen(@NotNull Player player, @NotNull HexIndex position) {
+    private BeeQueen(@NotNull Player player, @NotNull HexIndex position) {
         super(player, position, new Color(246, 141, 21));
     }
 
@@ -31,5 +31,10 @@ public class BeeQueen extends Unit {
                 return result;
             }
         };
+    }
+
+    @NotNull
+    public static BeeQueen create(@NotNull Player player, @NotNull HexIndex position) {
+        return new BeeQueen(player, position);
     }
 }

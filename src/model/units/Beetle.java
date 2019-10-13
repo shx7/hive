@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Beetle extends Unit {
-    public Beetle(@NotNull Player player, @NotNull HexIndex position) {
+    private Beetle(@NotNull Player player, @NotNull HexIndex position) {
         super(player, position, new Color(194, 69, 180));
     }
 
@@ -33,5 +33,10 @@ public class Beetle extends Unit {
                 return result;
             }
         };
+    }
+
+    @NotNull
+    private static Beetle create(@NotNull Player player, @NotNull HexIndex position) {
+        return new Beetle(player, position);
     }
 }

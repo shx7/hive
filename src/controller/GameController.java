@@ -30,13 +30,13 @@ public class GameController implements PlayerActionListener {
         List<Player> playerList =
                 Arrays.asList(blackPlayer, whitePlayer);
         GameController controller = new GameController(playerList);
-        controller.myGameModel.put(new BeeQueen(whitePlayer, HexIndex.create(0, 0)));
-        controller.myGameModel.put(new BeeQueen(blackPlayer, HexIndex.create(1, 0)));
-        controller.myGameModel.put(new BeeQueen(blackPlayer, HexIndex.create(1, -1)));
-        controller.myGameModel.put(new BeeQueen(whitePlayer, HexIndex.create(1, 1)));
-        controller.myGameModel.put(new BeeQueen(whitePlayer, HexIndex.create(1, 2)));
-        controller.myGameModel.put(new BeeQueen(blackPlayer, HexIndex.create(2, 0)));
-        controller.myGameModel.put(new BeeQueen(whitePlayer, HexIndex.create(2, 0)));
+        controller.myGameModel.put(BeeQueen.create(whitePlayer, HexIndex.create(0, 0)));
+        controller.myGameModel.put(BeeQueen.create(blackPlayer, HexIndex.create(1, 0)));
+        controller.myGameModel.put(BeeQueen.create(blackPlayer, HexIndex.create(1, -1)));
+        controller.myGameModel.put(BeeQueen.create(whitePlayer, HexIndex.create(1, 1)));
+        controller.myGameModel.put(BeeQueen.create(whitePlayer, HexIndex.create(1, 2)));
+        controller.myGameModel.put(BeeQueen.create(blackPlayer, HexIndex.create(2, 0)));
+        controller.myGameModel.put(BeeQueen.create(whitePlayer, HexIndex.create(2, 0)));
     }
 
     void setState(@NotNull GameState myState) {
