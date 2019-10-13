@@ -2,6 +2,8 @@ package model;
 
 import org.jetbrains.annotations.NotNull;
 
+import static model.Direction.*;
+
 public final class FieldUtils {
     /**
      * @param hexIndex hex which neighbours to enumerate
@@ -14,13 +16,10 @@ public final class FieldUtils {
      */
     @NotNull
     public static HexIndex[] getNeighboursIndices(@NotNull HexIndex hexIndex) {
-        final int p = hexIndex.p;
-        final int q = hexIndex.q;
-        int pShift = hexIndex.q % 2 != 0 ? 0 : -1;
+        HexIndex down = hexIndex.go(DOWN);
+        HexIndex up = hexIndex.go(UP);
         return new HexIndex[]{
-                HexIndex.create(p - 1, q), HexIndex.create(p  + pShift, q - 1),
-                HexIndex.create(p + pShift + 1, q - 1), HexIndex.create(p + 1, q),
-                HexIndex.create(p + pShift + 1, q + 1), HexIndex.create(p + pShift, q + 1)
+                hexIndex.go(LEFT), up.go(LEFT), up, hexIndex.go(RIGHT), down, down.go(LEFT)
         };
     }
 }

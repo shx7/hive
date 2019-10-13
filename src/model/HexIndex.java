@@ -4,7 +4,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public final class HexIndex { // TODO: reevaluate selected corrdinate system
+/**
+ *   Hex field layout is "odd-r" horizontal layout:
+ *
+ *   | 0,0 | 1,0 | 2,0 | 3,0 |
+ *      | 0,1 | 1,1 | 2,1 | 3,1 |
+ *   | 0,2 | 1,2 | 2,2 | 3,2 |
+ *
+ *  See <a href=https://www.redblobgames.com/grids/hexagons/#coordinates>hex grids article</a>
+ */
+public final class HexIndex {
     public final int p;
     public final int q;
 
@@ -35,9 +44,43 @@ public final class HexIndex { // TODO: reevaluate selected corrdinate system
 
     @Override
     public String toString() {
-        return "HexIndex{" +
+        return "{" +
                 "p=" + p +
                 ", q=" + q +
                 '}';
+    }
+
+    /**
+     * Hex grid layout:
+     *      | - | U |
+     *   | L | x | R |
+     *     | - | D |
+     */
+    @NotNull
+    public HexIndex go(@NotNull Direction direction) {
+        int newP = p;
+        int newQ = q;
+        int pShift = q % 2 != 0 ? 0 : -1;
+
+        switch (direction) {
+            case LEFT:
+                newP = p - 1;
+                break;
+
+            case RIGHT:
+                newP = p + 1;
+                break;
+
+            case UP:
+                newP += pShift + 1;
+                newQ--;
+                break;
+
+            case DOWN:
+                newP += pShift + 1;
+                newQ++;
+                break;
+        }
+        return HexIndex.create(newP, newQ);
     }
 }

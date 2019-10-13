@@ -3,8 +3,7 @@ package util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class ContainerUtil {
@@ -48,5 +47,11 @@ public class ContainerUtil {
             }
         }
         return result;
+    }
+
+    @SafeVarargs
+    @NotNull
+    public static <T> Set<T> setOf(@NotNull T ... args) {
+        return new HashSet<>(Arrays.asList(args));
     }
 }
