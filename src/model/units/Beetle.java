@@ -36,7 +36,7 @@ public class Beetle extends Unit {
     }
 
     @NotNull
-    private static Beetle create(@NotNull Player player, @NotNull HexIndex position) {
+    public static Beetle create(@NotNull Player player, @NotNull HexIndex position) {
         return new Beetle(player, position);
     }
 }
