@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -39,27 +40,39 @@ public abstract class PossibleMovesTest<T extends Unit> {
     @TestFactory
     @NotNull
     Stream<DynamicTest> testBlockedPassageByNeighbours() {
-        return generateTestsForOddAndEvenRow(this::generateBlockedPassageByNeighbours);
+        return generateTestsForOddAndEvenRow(index -> generateTests(index,
+                (neighbours, i) -> {
+                    HexIndex leftNeighbour = ContainerUtil.getCircular(neighbours, i + 1);
+                    HexIndex rightNeighbour = ContainerUtil.getCircular(neighbours, i - 1);
+                    putUnit(leftNeighbour);
+                    putUnit(rightNeighbour);
+                },
+                this::rightLeftNeighbourTestName,
+                this::expectedAllowedMovesForBlockedPassage));
     }
 
     @NotNull
-    private Stream<DynamicTest> generateBlockedPassageByNeighbours(@NotNull HexIndex startPosition) {
+    String rightLeftNeighbourTestName(@NotNull HexIndex startPosition, int index) {
+        HexIndex[] neighbours = FieldUtils.getNeighboursIndices(startPosition);
+        HexIndex leftNeighbour = ContainerUtil.getCircular(neighbours, index + 1);
+        HexIndex rightNeighbour = ContainerUtil.getCircular(neighbours, index - 1);
+        return "Move from: " + startPosition + " to: " + neighbours[index] + " obstacles: " + leftNeighbour + ", " + rightNeighbour;
+    }
+
+    @NotNull
+    Stream<DynamicTest> generateTests(@NotNull HexIndex startPosition,
+                                      @NotNull UnitsSetUpInTests setupUnits,
+                                      @NotNull TestNameGenerator nameGenerator,
+                                      @NotNull BiFunction<HexIndex[], Integer, Set<HexIndex>> allowedMovesGenerator) {
         HexIndex[] neighbours = FieldUtils.getNeighboursIndices(startPosition);
         return IntStream.range(0, 6)
-                .mapToObj(i -> {
-                    HexIndex leftNeighbour = ContainerUtil.getCircular(neighbours, i + 1);
-                    HexIndex rightNeighbour = ContainerUtil.getCircular(neighbours, i - 1);
-                    return DynamicTest.dynamicTest("Start position: " + startPosition + " neighbours: "
-                                    + leftNeighbour + ", " + rightNeighbour,
-                            () -> {
-                                setUp();
-                                T unit = putUnit(startPosition);
-                                putUnit(leftNeighbour);
-                                putUnit(rightNeighbour);
-                                assertPossibleMoves(unit,
-                                        expectedAllowedMovesForBlockedPassage(neighbours, i));
-                            });
-                });
+                .mapToObj(i -> DynamicTest.dynamicTest(nameGenerator.generate(startPosition, i),
+                        () -> {
+                            setUp();
+                            setupUnits.setUp(neighbours, i);
+                            T unit = putUnit(startPosition);
+                            assertPossibleMoves(unit, allowedMovesGenerator.apply(neighbours, i));
+                        }));
     }
 
     @NotNull
@@ -113,7 +126,7 @@ public abstract class PossibleMovesTest<T extends Unit> {
     }
 
     @NotNull
-    private Stream<DynamicTest> generateOneAdjacentNeighbourTests(HexIndex startPosition) {
+    private Stream<DynamicTest> generateOneAdjacentNeighbourTests(@NotNull HexIndex startPosition) {
         HexIndex[] neighbours = FieldUtils.getNeighboursIndices(startPosition);
         return IntStream.range(0, 6)
                 .mapToObj(i -> DynamicTest.dynamicTest("Start position: " + startPosition + " neighbour: " + neighbours[i],
@@ -159,7 +172,7 @@ public abstract class PossibleMovesTest<T extends Unit> {
     }
 
     @NotNull
-    private static Stream<DynamicTest> generateTestsForOddAndEvenRow(@NotNull Function<HexIndex, Stream<DynamicTest>> testGenerator) {
+    static Stream<DynamicTest> generateTestsForOddAndEvenRow(@NotNull Function<HexIndex, Stream<DynamicTest>> testGenerator) {
         return Stream.concat(testGenerator.apply(HexIndex.create(0, 0)),
                 testGenerator.apply(HexIndex.create(1, 0)));
     }

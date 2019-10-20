@@ -80,9 +80,10 @@ public class GameModel {
             HexIndex neighbourHex = neighboursIndices[i];
             HexIndex leftNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i - 1);
             HexIndex rightNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i + 1);
-            if (unitListSize > getUnitsAmount(neighbourHex)
+            if (unitListSize > getUnitsAmount(neighbourHex) // can slide on level down or move to
                     && (unitListSize > getUnitsAmount(leftNeighbourHex)
-                        || unitListSize > getUnitsAmount(rightNeighbourHex))) {
+                        || unitListSize > getUnitsAmount(rightNeighbourHex))) // passage not blocked
+            {
                 result.add(neighbourHex);
             }
         }
