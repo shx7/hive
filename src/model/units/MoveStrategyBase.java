@@ -13,24 +13,7 @@ import java.util.Set;
 
 import static model.FieldUtils.getNeighboursIndices;
 
-public abstract class MoveStrategyBase implements MoveStrategy {
-    public List<HexIndex> getNeighboursWhereCanSlide(@NotNull HexIndex from,
-                                                     @NotNull GameModel model) {
-        final List<HexIndex> result = new ArrayList<>();
-        HexIndex[] neighboursIndices = getNeighboursIndices(from);
-        int length = neighboursIndices.length;
-        for (int i = 0; i < length; i++) {
-            HexIndex neighbourHex = neighboursIndices[i];
-            HexIndex leftNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i - 1);
-            HexIndex rightNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i + 1);
-            if (model.isEmptyHex(neighbourHex)
-                    && (model.isEmptyHex(leftNeighbourHex) || model.isEmptyHex(rightNeighbourHex))) {
-                result.add(neighbourHex);
-            }
-        }
-        return result;
-    }
-
+abstract class MoveStrategyBase implements MoveStrategy {
     /**
      *
      * @param from is null, if after move hex becomes empty, and not null,
@@ -38,12 +21,27 @@ public abstract class MoveStrategyBase implements MoveStrategy {
      * @return true if swarm is connected after performing specified move
      *         without changing model and performing move
      */
-    protected boolean swarmStaysConnectedIfMove(@Nullable HexIndex from,
-                                                @NotNull HexIndex to,
-                                                @NotNull GameModel model) {
-        return countConnectedHexesIfMove(from, to, model) >= model.getNotEmptyHexIndices().size(); // TODO: fix condition for stack movement
+    boolean swarmStaysConnectedIfMove(@NotNull HexIndex from,
+                                      @NotNull HexIndex to,
+                                      @NotNull GameModel model) {
+        int expectedVisitedHexes = model.getNotEmptyHexIndices().size();
+        if (model.isEmptyHex(to)) {
+            ++expectedVisitedHexes;
+        }
+
+        if (model.getUnitsAmount(from) == 1) {
+            --expectedVisitedHexes;
+        }
+        else { // we won't empty `from` hex, therefore shouldn't blacklist it from visiting
+            from = null;
+        }
+        return countConnectedHexesIfMove(from, to, model) == expectedVisitedHexes;
     }
 
+    /**
+     * @param from is null when it's allowed to visit this hex
+     *             is not null, when we blacklist it from visiting
+     */
     private int countConnectedHexesIfMove(@Nullable HexIndex from,
                                           @NotNull HexIndex to,
                                           @NotNull GameModel model) {

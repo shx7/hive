@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Beetle extends Unit {
@@ -22,11 +21,14 @@ public class Beetle extends Unit {
             @Override
             @NotNull
             public Set<HexIndex> getPossibleMoves(@NotNull HexIndex fromIndex, @NotNull GameModel model) {
-                List<Unit> unitList = model.getUnitList(getPosition());
+                int unitsAmount = model.getUnitsAmount(getPosition());
                 final Set<HexIndex> result = new HashSet<>();
+                Set<HexIndex> neighboursWhereCanSlide = model.getNeighboursWhereCanSlide(getPosition());
 
                 for (HexIndex neighbourHex : FieldUtils.getNeighboursIndices(fromIndex)) {
-                    if (swarmStaysConnectedIfMove(unitList.size() == 1 ? fromIndex : null, neighbourHex, model)) { // will touch the swarm
+                    if (swarmStaysConnectedIfMove(fromIndex, neighbourHex, model)
+                            && (neighboursWhereCanSlide.contains(neighbourHex) // can squeeze through
+                                || unitsAmount <= model.getUnitsAmount(neighbourHex))) { // can climb
                         result.add(neighbourHex);
                     }
                 }

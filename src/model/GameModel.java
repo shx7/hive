@@ -4,6 +4,7 @@ import model.units.Unit;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import util.ContainerUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -70,6 +71,30 @@ public class GameModel {
     }
 
     @NotNull
+    public Set<HexIndex> getNeighboursWhereCanSlide(@NotNull HexIndex from) {
+        final Set<HexIndex> result = new HashSet<>();
+        HexIndex[] neighboursIndices = getNeighboursIndices(from);
+        final int unitListSize = getUnitsAmount(from);
+        int length = neighboursIndices.length;
+        for (int i = 0; i < length; i++) {
+            HexIndex neighbourHex = neighboursIndices[i];
+            HexIndex leftNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i - 1);
+            HexIndex rightNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i + 1);
+            if (unitListSize > getUnitsAmount(neighbourHex)
+                    && (unitListSize > getUnitsAmount(leftNeighbourHex)
+                        || unitListSize > getUnitsAmount(rightNeighbourHex))) {
+                result.add(neighbourHex);
+            }
+        }
+        return result;
+    }
+
+    public int getUnitsAmount(@NotNull HexIndex rightNeighbourHex) {
+        return getUnitList(rightNeighbourHex).size();
+    }
+
+
+    @NotNull
     public Set<HexIndex> getHexIndices() {
         return myField.keySet();
     }
@@ -83,7 +108,7 @@ public class GameModel {
 
     @Nullable
     @Contract("null -> null; !null -> !null") // TODO: nasty, refactor
-    public List<Unit> getUnitList(@Nullable HexIndex index) {
+    private List<Unit> getUnitList(@Nullable HexIndex index) {
         List<Unit> result = null;
         if (index != null) {
             result = myField.get(index);

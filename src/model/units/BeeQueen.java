@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class BeeQueen extends Unit {
@@ -21,10 +20,9 @@ public class BeeQueen extends Unit {
             @NotNull
             @Override
             public Set<HexIndex> getPossibleMoves(@NotNull HexIndex fromIndex, @NotNull GameModel model) {
-                List<Unit> unitList = model.getUnitList(fromIndex);
                 final Set<HexIndex> result = new HashSet<>();
-                for (HexIndex neighbourHex : getNeighboursWhereCanSlide(fromIndex, model)) {
-                    if (swarmStaysConnectedIfMove(unitList.size() == 1 ? fromIndex : null, neighbourHex, model)) { // will touch the swarm
+                for (HexIndex neighbourHex : model.getNeighboursWhereCanSlide(fromIndex)) {
+                    if (swarmStaysConnectedIfMove(fromIndex, neighbourHex, model)) { // will touch the swarm
                         result.add(neighbourHex);
                     }
                 }
