@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -40,15 +39,30 @@ public abstract class PossibleMovesTest<T extends Unit> {
     @TestFactory
     @NotNull
     Stream<DynamicTest> testBlockedPassageByNeighbours() {
-        return generateTestsForOddAndEvenRow(index -> generateTests(index,
-                (neighbours, i) -> {
-                    HexIndex leftNeighbour = ContainerUtil.getCircular(neighbours, i + 1);
-                    HexIndex rightNeighbour = ContainerUtil.getCircular(neighbours, i - 1);
-                    putUnit(leftNeighbour);
-                    putUnit(rightNeighbour);
-                },
-                this::rightLeftNeighbourTestName,
-                this::expectedAllowedMovesForBlockedPassage));
+        return generateTestsForOddAndEvenRow(startPosition -> generateTests(
+                new PossibleMovesTestDataGeneratorBase(startPosition) {
+                    @Override
+                    void setUp(int neighbourIndex) {
+                        super.setUp(neighbourIndex);
+                        HexIndex leftNeighbour = ContainerUtil.getCircular(getNeighbours(), neighbourIndex + 1);
+                        HexIndex rightNeighbour = ContainerUtil.getCircular(getNeighbours(), neighbourIndex - 1);
+                        putUnit(leftNeighbour);
+                        putUnit(rightNeighbour);
+                    }
+
+                    @Override
+                    @NotNull
+                    protected Set<HexIndex> getObstacles(int neighbourIndex) {
+                        HexIndex right = ContainerUtil.getCircular(getNeighbours(), neighbourIndex + 1);
+                        HexIndex left = ContainerUtil.getCircular(getNeighbours(), neighbourIndex - 1);
+                        return Set.of(left, right);
+                    }
+
+                    @Override
+                    @NotNull Set<HexIndex> allowedMoves(int neighbourIndex) {
+                        return expectedAllowedMovesForBlockedPassage(getNeighbours(), neighbourIndex);
+                    }
+                }));
     }
 
     @NotNull
@@ -60,23 +74,20 @@ public abstract class PossibleMovesTest<T extends Unit> {
     }
 
     @NotNull
-    Stream<DynamicTest> generateTests(@NotNull HexIndex startPosition,
-                                      @NotNull UnitsSetUpInTests setupUnits,
-                                      @NotNull TestNameGenerator nameGenerator,
-                                      @NotNull BiFunction<HexIndex[], Integer, Set<HexIndex>> allowedMovesGenerator) {
-        HexIndex[] neighbours = FieldUtils.getNeighboursIndices(startPosition);
+    Stream<DynamicTest> generateTests(@NotNull PossibleMovesTestDataGenerator testDataGenerator) {
         return IntStream.range(0, 6)
-                .mapToObj(i -> DynamicTest.dynamicTest(nameGenerator.generate(startPosition, i),
+                .mapToObj(i -> DynamicTest.dynamicTest(testDataGenerator.getTestName(i),
                         () -> {
-                            setUp();
-                            setupUnits.setUp(neighbours, i);
-                            T unit = putUnit(startPosition);
-                            assertPossibleMoves(unit, allowedMovesGenerator.apply(neighbours, i));
+                            testDataGenerator.setUp(i);
+                            T unit = putUnit(testDataGenerator.getStartPosition());
+                            assertPossibleMoves(unit, testDataGenerator.allowedMoves(i));
                         }));
     }
 
     @NotNull
-    protected abstract Set<HexIndex> expectedAllowedMovesForBlockedPassage(@NotNull HexIndex[] neighbours, int i);
+    protected Set<HexIndex> expectedAllowedMovesForBlockedPassage(@NotNull HexIndex[] neighbours, int i) {
+        return Collections.emptySet();
+    }
 
     /**
      *  Test scheme
@@ -92,26 +103,30 @@ public abstract class PossibleMovesTest<T extends Unit> {
 
     @NotNull
     private Stream<DynamicTest> generateJoinedNeighboursTests(@NotNull HexIndex startPosition) {
-        HexIndex[] neighbours = FieldUtils.getNeighboursIndices(startPosition);
-        return IntStream.range(0, 6)
-                .mapToObj(i -> {
-                    HexIndex center = neighbours[i];
-                    HexIndex tail = ContainerUtil.getCircular(neighbours, i - 1);
-                    return DynamicTest.dynamicTest("Start position: " + startPosition
-                                    + " neighbours: " + center + ", " + tail,
-                            () -> {
-                                setUp();
-                                T unit = putUnit(startPosition);
-                                putUnit(center);
-                                putUnit(tail);
-                                assertPossibleMoves(unit, expectedAllowedMovesForTwoJoinedNeighbours(neighbours, i));
-                            });
-                });
+        return generateTests(new PossibleMovesTestDataGeneratorBase(startPosition) {
+            @Override
+            void setUp(int neighbourIndex) {
+                super.setUp(neighbourIndex);
+                putUnit(getNeighbours()[neighbourIndex]); // center
+                putUnit(ContainerUtil.getCircular(getNeighbours(), neighbourIndex - 1)); // tail
+            }
+
+            @Override
+            protected @NotNull Set<HexIndex> getObstacles(int neighbourIndex) {
+                HexIndex center = getNeighbours()[neighbourIndex];
+                HexIndex tail = ContainerUtil.getCircular(getNeighbours(), neighbourIndex - 1);
+                return Set.of(center, tail);
+            }
+
+            @Override
+            @NotNull Set<HexIndex> allowedMoves(int neighbourIndex) {
+                return expectedAllowedMovesForTwoJoinedNeighbours(getNeighbours(), neighbourIndex);
+            }
+        });
     }
 
     @NotNull
-    protected abstract Set<HexIndex> expectedAllowedMovesForTwoJoinedNeighbours(@NotNull HexIndex[] neighbours,
-                                                                                int i);
+    protected abstract Set<HexIndex> expectedAllowedMovesForTwoJoinedNeighbours(@NotNull HexIndex[] neighbours, int i);
 
     /**
      *  Test scheme
@@ -175,5 +190,28 @@ public abstract class PossibleMovesTest<T extends Unit> {
     static Stream<DynamicTest> generateTestsForOddAndEvenRow(@NotNull Function<HexIndex, Stream<DynamicTest>> testGenerator) {
         return Stream.concat(testGenerator.apply(HexIndex.create(0, 0)),
                 testGenerator.apply(HexIndex.create(1, 0)));
+    }
+
+    protected abstract class PossibleMovesTestDataGeneratorBase extends PossibleMovesTestDataGenerator {
+        PossibleMovesTestDataGeneratorBase(@NotNull HexIndex startPosition) {
+            super(startPosition, PossibleMovesTest.this::setUp);
+        }
+
+        @NotNull
+        protected Set<HexIndex> getObstacles(int neighbourIndex) {
+            return Collections.emptySet();
+        }
+
+        @Override
+        @NotNull String getTestName(int neighbourIndex) {
+            String obstaclesStr = getObstacles(neighbourIndex)
+                    .stream()
+                    .map(HexIndex::toString)
+                    .collect(Collectors.joining(", "));
+            if (!obstaclesStr.isEmpty()) {
+                obstaclesStr = " obstacles: " + obstaclesStr;
+            }
+            return super.getTestName(neighbourIndex) + obstaclesStr;
+        }
     }
 }

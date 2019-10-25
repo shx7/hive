@@ -38,18 +38,24 @@ public class PossibleMovesBeetleTest extends PossibleMovesTest<Beetle> {
     @NotNull
     Stream<DynamicTest> testBlockedPassageOnEvenlyFilledLevel() {
         return generateTestsForOddAndEvenRow(startIndex ->
-                generateTests(startIndex,
-                        (neighbours, i) -> {
-                            Arrays.stream(neighbours).forEach(this::putUnit);
-                            putUnit(startIndex);
-                            putUnit(ContainerUtil.getCircular(neighbours, i - 1));
-                            putUnit(ContainerUtil.getCircular(neighbours, i + 1));
-                        },
-                        this::rightLeftNeighbourTestName,
-                        (neighbours, i) -> IntStream.range(0, neighbours.length)
-                                .filter(k -> k != i)
-                                .mapToObj(k -> neighbours[k])
-                                .collect(Collectors.toSet())
+                generateTests(new PossibleMovesTestDataGeneratorBase(startIndex) {
+                                  @Override
+                                  void setUp(int neighbourIndex) {
+                                      super.setUp(neighbourIndex);
+                                      Arrays.stream(getNeighbours()).forEach(PossibleMovesBeetleTest.this::putUnit);
+                                      putUnit(startIndex);
+                                      putUnit(ContainerUtil.getCircular(getNeighbours(), neighbourIndex - 1));
+                                      putUnit(ContainerUtil.getCircular(getNeighbours(), neighbourIndex + 1));
+                                  }
+
+                                  @Override
+                                  @NotNull Set<HexIndex> allowedMoves(int neighbourIndex) {
+                                      return IntStream.range(0, getNeighbours().length)
+                                              .filter(k -> k != neighbourIndex)
+                                              .mapToObj(k -> getNeighbours()[k])
+                                              .collect(Collectors.toSet());
+                                  }
+                              }
                 )
         );
     }
