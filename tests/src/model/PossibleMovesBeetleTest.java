@@ -24,13 +24,15 @@ public class PossibleMovesBeetleTest extends PossibleMovesTest<Beetle> {
 
     @Override
     @NotNull
-    protected Set<HexIndex> expectedAllowedMovesForTwoJoinedNeighbours(@NotNull HexIndex[] neighbours, int i) {
+    protected Set<HexIndex> expectedAllowedMovesForTwoJoinedNeighbours(@NotNull HexIndex[] neighbours, int i,
+                                                                       @NotNull HexIndex startPosition) {
         return getIndices(neighbours, i + 1, i, i - 1, i - 2);
     }
 
     @Override
     @NotNull
-    protected Set<HexIndex> expectedAllowedMovesForOneAdjacentNeighbour(@NotNull HexIndex[] neighbours, int i) {
+    protected Set<HexIndex> expectedAllowedMovesForOneAdjacentNeighbour(@NotNull HexIndex[] neighbours, int i,
+                                                                        @NotNull HexIndex startPosition) {
         return getIndices(neighbours, i + 1, i, i - 1);
     }
 

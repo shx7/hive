@@ -33,7 +33,8 @@ class PossibleMovesQueenBeeTest extends PossibleMovesTest<BeeQueen> {
 
     @Override
     @NotNull
-    protected Set<HexIndex> expectedAllowedMovesForOneAdjacentNeighbour(@NotNull HexIndex[] neighbours, int i) {
+    protected Set<HexIndex> expectedAllowedMovesForOneAdjacentNeighbour(@NotNull HexIndex[] neighbours, int i,
+                                                                        @NotNull HexIndex startPosition) {
         return getIndices(neighbours, i + 1, i - 1);
     }
 
@@ -45,7 +46,8 @@ class PossibleMovesQueenBeeTest extends PossibleMovesTest<BeeQueen> {
 
     @Override
     @NotNull
-    protected Set<HexIndex> expectedAllowedMovesForTwoJoinedNeighbours(@NotNull HexIndex[] neighbours, int i) {
+    protected Set<HexIndex> expectedAllowedMovesForTwoJoinedNeighbours(@NotNull HexIndex[] neighbours, int i,
+                                                                       @NotNull HexIndex startPosition) {
         return getIndices(neighbours, i + 1, i - 2);
     }
 

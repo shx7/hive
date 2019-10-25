@@ -72,26 +72,41 @@ public class GameModel {
 
     @NotNull
     public Set<HexIndex> getNeighboursWhereCanSlide(@NotNull HexIndex from) {
+        return getNeighboursWhereCanSlide(from, true);
+    }
+
+    @NotNull
+    public Set<HexIndex> getNeighboursWhereCanSlide(@NotNull HexIndex from,
+                                                    boolean isUnitFromThisHex) {
         final Set<HexIndex> result = new HashSet<>();
         HexIndex[] neighboursIndices = getNeighboursIndices(from);
-        final int unitListSize = getUnitsAmount(from);
+        int level = getUnitsAmount(from);
+        if (!isUnitFromThisHex) {
+            ++level;
+        }
         int length = neighboursIndices.length;
         for (int i = 0; i < length; i++) {
             HexIndex neighbourHex = neighboursIndices[i];
             HexIndex leftNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i - 1);
             HexIndex rightNeighbourHex = ContainerUtil.getCircular(neighboursIndices, i + 1);
-            if (unitListSize > getUnitsAmount(neighbourHex) // can slide on level down or move to
-                    && (unitListSize > getUnitsAmount(leftNeighbourHex)
-                        || unitListSize > getUnitsAmount(rightNeighbourHex))) // passage not blocked
-            {
+            if (isHexOnTheBoard(neighbourHex) && level > getLevel(neighbourHex)
+                    && (level > getLevel(leftNeighbourHex) || level > getLevel(rightNeighbourHex))) {
                 result.add(neighbourHex);
             }
         }
         return result;
     }
 
-    public int getUnitsAmount(@NotNull HexIndex rightNeighbourHex) {
-        return getUnitList(rightNeighbourHex).size();
+    private int getLevel(@NotNull HexIndex index) {
+        return isHexOnTheBoard(index) ? getUnitsAmount(index) : 0;
+    }
+
+    public int getUnitsAmount(@NotNull HexIndex index) {
+        return getUnitList(index).size();
+    }
+
+    private boolean isHexOnTheBoard(@NotNull HexIndex index) {
+        return myField.containsKey(index);
     }
 
 

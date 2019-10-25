@@ -70,7 +70,7 @@ public class GameUI {
         return result;
     }
 
-    private void drawGameField(Graphics g) {
+    private void drawGameField(@NotNull Graphics g) {
         // Needed to avoid drawing same lines twice, because it leads to some
         // lines becoming think while others normal
         HexIndex selectedHex = myGameModel.getSelectedHex();

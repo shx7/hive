@@ -120,13 +120,14 @@ public abstract class PossibleMovesTest<T extends Unit> {
 
             @Override
             @NotNull Set<HexIndex> allowedMoves(int neighbourIndex) {
-                return expectedAllowedMovesForTwoJoinedNeighbours(getNeighbours(), neighbourIndex);
+                return expectedAllowedMovesForTwoJoinedNeighbours(getNeighbours(), neighbourIndex, getStartPosition());
             }
         });
     }
 
     @NotNull
-    protected abstract Set<HexIndex> expectedAllowedMovesForTwoJoinedNeighbours(@NotNull HexIndex[] neighbours, int i);
+    protected abstract Set<HexIndex> expectedAllowedMovesForTwoJoinedNeighbours(@NotNull HexIndex[] neighbours, int i,
+                                                                                @NotNull HexIndex startPosition);
 
     /**
      *  Test scheme
@@ -149,12 +150,13 @@ public abstract class PossibleMovesTest<T extends Unit> {
                             setUp();
                             T unit = putUnit(startPosition);
                             putUnit(neighbours[i]);
-                            assertPossibleMoves(unit, expectedAllowedMovesForOneAdjacentNeighbour(neighbours, i));
+                            assertPossibleMoves(unit, expectedAllowedMovesForOneAdjacentNeighbour(neighbours, i, startPosition));
                         }));
     }
 
     @NotNull
-    protected abstract Set<HexIndex> expectedAllowedMovesForOneAdjacentNeighbour(@NotNull HexIndex[] neighbours, int i);
+    protected abstract Set<HexIndex> expectedAllowedMovesForOneAdjacentNeighbour(@NotNull HexIndex[] neighbours, int i,
+                                                                                 @NotNull HexIndex startPosition);
 
     @NotNull
     protected abstract T createUnit(@NotNull HexIndex index, @NotNull Player player);
