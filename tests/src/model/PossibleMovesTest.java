@@ -9,10 +9,8 @@ import org.junit.jupiter.api.TestFactory;
 import util.ContainerUtil;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -63,14 +61,6 @@ public abstract class PossibleMovesTest<T extends Unit> {
                         return expectedAllowedMovesForBlockedPassage(getNeighbours(), neighbourIndex);
                     }
                 }));
-    }
-
-    @NotNull
-    String rightLeftNeighbourTestName(@NotNull HexIndex startPosition, int index) {
-        HexIndex[] neighbours = FieldUtils.getNeighboursIndices(startPosition);
-        HexIndex leftNeighbour = ContainerUtil.getCircular(neighbours, index + 1);
-        HexIndex rightNeighbour = ContainerUtil.getCircular(neighbours, index - 1);
-        return "Move from: " + startPosition + " to: " + neighbours[index] + " obstacles: " + leftNeighbour + ", " + rightNeighbour;
     }
 
     @NotNull
@@ -158,6 +148,44 @@ public abstract class PossibleMovesTest<T extends Unit> {
     protected abstract Set<HexIndex> expectedAllowedMovesForOneAdjacentNeighbour(@NotNull HexIndex[] neighbours, int i,
                                                                                  @NotNull HexIndex startPosition);
 
+    /**
+     *  Test scheme
+     *     | - |   |
+     *   | - | x |   |
+     *     | - |   |
+     */
+    @TestFactory
+    Stream<DynamicTest> testThreeAdjacentNeighbours() {
+        return generateTestsForOddAndEvenRow(startPosition ->
+                generateTests(new PossibleMovesTestDataGeneratorBase(startPosition) {
+                    @Override
+                    void setUp(int neighbourIndex) {
+                        super.setUp(neighbourIndex);
+                        putUnit(getNeighbour(neighbourIndex));
+                        putUnit(getNeighbour(neighbourIndex - 1));
+                        putUnit(getNeighbour(neighbourIndex - 2));
+                    }
+
+                    @Override
+                    protected @NotNull Set<HexIndex> getObstacles(int neighbourIndex) {
+                        return Set.of(getNeighbour(neighbourIndex),
+                                      getNeighbour(neighbourIndex - 1),
+                                      getNeighbour(neighbourIndex - 2));
+                    }
+
+                    @Override
+                    @NotNull Set<HexIndex> allowedMoves(int neighbourIndex) {
+                        return allowedMovesThreeAdjacentNeighbours(getStartPosition(), getNeighbours(), neighbourIndex);
+                    }
+                })
+        );
+    }
+
+    @NotNull
+    abstract Set<HexIndex> allowedMovesThreeAdjacentNeighbours(@NotNull HexIndex startPosition,
+                                                               @NotNull HexIndex[] neighbours,
+                                                               int index);
+
     @NotNull
     protected abstract T createUnit(@NotNull HexIndex index, @NotNull Player player);
 
@@ -194,6 +222,18 @@ public abstract class PossibleMovesTest<T extends Unit> {
                 testGenerator.apply(HexIndex.create(1, 0)));
     }
 
+    @NotNull
+    Set<HexIndex> getSurroundingHexes(HexIndex[] neighbours, int... neighbourIndices) {
+        Set<HexIndex> result = new HashSet<>();
+        for (int idx : neighbourIndices) {
+            Collections.addAll(result, FieldUtils.getNeighboursIndices(ContainerUtil.getCircular(neighbours, idx)));
+        }
+        for (int idx : neighbourIndices) {
+            result.remove(ContainerUtil.getCircular(neighbours, idx));
+        }
+        return result;
+    }
+
     protected abstract class PossibleMovesTestDataGeneratorBase extends PossibleMovesTestDataGenerator {
         PossibleMovesTestDataGeneratorBase(@NotNull HexIndex startPosition) {
             super(startPosition, PossibleMovesTest.this::setUp);
@@ -214,6 +254,11 @@ public abstract class PossibleMovesTest<T extends Unit> {
                 obstaclesStr = " obstacles: " + obstaclesStr;
             }
             return super.getTestName(neighbourIndex) + obstaclesStr;
+        }
+
+        @NotNull
+        HexIndex getNeighbour(int index) {
+            return ContainerUtil.getCircular(getNeighbours(), index);
         }
     }
 }

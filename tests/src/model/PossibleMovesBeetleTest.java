@@ -36,6 +36,13 @@ public class PossibleMovesBeetleTest extends PossibleMovesTest<Beetle> {
         return getIndices(neighbours, i + 1, i, i - 1);
     }
 
+    @Override
+    @NotNull Set<HexIndex> allowedMovesThreeAdjacentNeighbours(@NotNull HexIndex startPosition,
+                                                               @NotNull HexIndex[] neighbours,
+                                                               int i) {
+        return getIndices(neighbours, i + 1, i, i - 1, i - 2, i - 3);
+    }
+
     @TestFactory
     @NotNull
     Stream<DynamicTest> testBlockedPassageOnEvenlyFilledLevel() {

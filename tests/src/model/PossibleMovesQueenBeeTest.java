@@ -39,6 +39,13 @@ class PossibleMovesQueenBeeTest extends PossibleMovesTest<BeeQueen> {
     }
 
     @Override
+    @NotNull Set<HexIndex> allowedMovesThreeAdjacentNeighbours(@NotNull HexIndex startPosition,
+                                                               @NotNull HexIndex[] neighbours,
+                                                               int i) {
+        return getIndices(neighbours, i + 1, i - 3);
+    }
+
+    @Override
     @NotNull
     protected Set<HexIndex> expectedAllowedMovesForBlockedPassage(@NotNull HexIndex[] neighbours, int i) {
         return Collections.emptySet();

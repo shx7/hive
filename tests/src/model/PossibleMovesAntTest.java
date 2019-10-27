@@ -13,8 +13,9 @@ import java.util.Set;
 
 public class PossibleMovesAntTest extends PossibleMovesTest<Ant> {
     @Override
-    protected @NotNull Set<HexIndex> expectedAllowedMovesForTwoJoinedNeighbours(@NotNull HexIndex[] neighbours, int i,
-                                                                                @NotNull HexIndex startPosition) {
+    @NotNull
+    protected Set<HexIndex> expectedAllowedMovesForTwoJoinedNeighbours(@NotNull HexIndex[] neighbours, int i,
+                                                                       @NotNull HexIndex startPosition) {
         Set<HexIndex> result = new HashSet<>();
         HexIndex head = neighbours[i];
         HexIndex tail = ContainerUtil.getCircular(neighbours, i - 1);
@@ -28,10 +29,21 @@ public class PossibleMovesAntTest extends PossibleMovesTest<Ant> {
     }
 
     @Override
-    protected @NotNull Set<HexIndex> expectedAllowedMovesForOneAdjacentNeighbour(@NotNull HexIndex[] neighbours, int i,
-                                                                                 @NotNull HexIndex startPosition) {
+    @NotNull
+    protected Set<HexIndex> expectedAllowedMovesForOneAdjacentNeighbour(@NotNull HexIndex[] neighbours, int i,
+                                                                        @NotNull HexIndex startPosition) {
         Set<HexIndex> result = new HashSet<>();
         Collections.addAll(result, FieldUtils.getNeighboursIndices(neighbours[i]));
+        result.remove(startPosition);
+        return result;
+    }
+
+    @Override
+    @NotNull Set<HexIndex> allowedMovesThreeAdjacentNeighbours(@NotNull HexIndex startPosition,
+                                                               @NotNull HexIndex[] neighbours,
+                                                               int index) {
+        Set<HexIndex> result =
+                getSurroundingHexes(neighbours, index, index - 1, index - 2);
         result.remove(startPosition);
         return result;
     }
